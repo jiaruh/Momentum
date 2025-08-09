@@ -20,41 +20,57 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                HStack {
-                    TextField("Enter a new task", text: $newTask)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.leading)
+            ZStack {
+                LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.4), Color.purple.opacity(0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                    .edgesIgnoringSafeArea(.all)
 
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus.circle.fill")
-                            .font(.title2)
+                VStack(spacing: 0) {
+                    HStack {
+                        TextField("Add a new task...", text: $newTask)
+                            .padding()
+                            .background(Color.white.opacity(0.8))
+                            .cornerRadius(10)
+                            .padding(.leading)
+
+                        Button(action: addItem) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.largeTitle)
+                                .foregroundColor(.white)
+                        }
+                        .padding(.trailing)
+                        .disabled(newTask.isEmpty)
                     }
-                    .padding(.trailing)
-                    .disabled(newTask.isEmpty)
-                }
-                .padding(.top)
+                    .padding()
 
-                List {
-                    ForEach(items) { item in
-                        HStack {
-                            Toggle(isOn: Binding(
-                                get: { item.isCompleted },
-                                set: {
-                                    item.isCompleted = $0
+                    List {
+                        ForEach(items) { item in
+                            HStack {
+                                Button(action: {
+                                    item.isCompleted.toggle()
                                     saveContext()
+                                }) {
+                                    Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+                                        .foregroundColor(item.isCompleted ? .green : .primary)
                                 }
-                            )) {
+                                .buttonStyle(PlainButtonStyle())
+
                                 Text(item.task ?? "Untitled")
                                     .strikethrough(item.isCompleted, color: .primary)
                                     .foregroundColor(item.isCompleted ? .secondary : .primary)
                             }
-                            .toggleStyle(CheckboxToggleStyle())
+                            .padding()
+                            .background(Color.white.opacity(0.9))
+                            .cornerRadius(10)
+                            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+                            .listRowSeparator(.hidden)
                         }
+                        .onDelete(perform: deleteItems)
+                        .listRowBackground(Color.clear)
                     }
-                    .onDelete(perform: deleteItems)
+                    .listStyle(PlainListStyle())
                 }
-                .navigationTitle("To-Do List")
+                .navigationTitle("My Tasks")
+                .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         EditButton()
@@ -94,23 +110,6 @@ struct ContentView: View {
         }
     }
 }
-
-// A custom toggle style to look more like a checkbox
-struct CheckboxToggleStyle: ToggleStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        Button {
-            configuration.isOn.toggle()
-        } label: {
-            HStack {
-                Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
-                    .font(.title2)
-                configuration.label
-            }
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
-
 
 #Preview {
     ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
