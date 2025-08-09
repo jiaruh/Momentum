@@ -1,0 +1,83 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'Sources/**/*.swift'
+      - 'Documentation.docc/**'
+      - 'Sources/**/*.docc/**'
+      - 'Package.swift'
+  workflow_dispatch:
+
+jobs:
+  deploy-docs:
+    runs-on: macos-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+    - uses: actions/checkout@v4
+    - uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: 'latest'
+    
+    - name: Build Documentation
+      run: |
+        xcodebuild docbuild \
+          -scheme Momentum \
+          -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+          -derivedDataPath ./DerivedData
+    
+    - name: Process Documentation Archive
+      run: |
+        # Find the generated documentation archive
+        DOCC_ARCHIVE=$(find ./DerivedData -name "*.doccarchive" -type d | head -1)
+        if [ -n "$DOCC_ARCHIVE" ]; then
+          echo "Found documentation archive: $DOCC_ARCHIVE"
+          # Convert to static website for GitHub Pages
+          xcrun docc process-archive transform-for-static-hosting \
+            "$DOCC_ARCHIVE" \
+            --output-path ./docs \
+            --hosting-base-path "/Momentum"
+          echo "Documentation processed for GitHub Pages"
+          
+          # Create index.html redirect if it doesn't exist
+          if [ ! -f "./docs/index.html" ]; then
+            cat > ./docs/index.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Momentum Documentation</title>
+    <meta http-equiv="refresh" content="0; url=./documentation/momentum/">
+    <link rel="canonical" href="./documentation/momentum/">
+</head>
+<body>
+    <p>Redirecting to <a href="./documentation/momentum/">Momentum Documentation</a>...</p>
+</body>
+</html>
+EOF
+          fi
+        else
+          echo "No documentation archive found"
+          exit 1
+        fi
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./docs
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

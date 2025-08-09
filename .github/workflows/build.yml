@@ -40,6 +40,37 @@ jobs:
         xcodebuild clean build \
           -project Momentum.xcodeproj \
           -target Momentum \
-          -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+          -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO
+    
+    - name: Build Documentation
+      run: |
+        xcodebuild docbuild \
+          -scheme Momentum \
+          -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+          -derivedDataPath ./DerivedData
+    
+    - name: Export Documentation Archive
+      run: |
+        # Find the generated documentation archive
+        DOCC_ARCHIVE=$(find ./DerivedData -name "*.doccarchive" -type d | head -1)
+        if [ -n "$DOCC_ARCHIVE" ]; then
+          echo "Found documentation archive: $DOCC_ARCHIVE"
+          # Convert to static website
+          xcrun docc process-archive transform-for-static-hosting \
+            "$DOCC_ARCHIVE" \
+            --output-path ./docs \
+            --hosting-base-path "/Momentum"
+          echo "Documentation exported to ./docs"
+        else
+          echo "No documentation archive found"
+          exit 1
+        fi
+    
+    - name: Upload Documentation Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation
+        path: ./docs
+        retention-days: 30
