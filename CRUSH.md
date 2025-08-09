@@ -1,12 +1,12 @@
-# Test0802 Project Quickstart
+# Momentum Project Quickstart
 
-This document provides essential commands and guidelines for developing in the Test0802 codebase.
+This document provides essential commands and guidelines for developing in the Momentum codebase.
 
 ## Common Commands
 
-- **Build**: `xcodebuild build -scheme Test0802 -destination 'platform=iOS Simulator,name=iPhone 14'`
-- **Run all tests**: `xcodebuild test -scheme Test0802 -destination 'platform=iOS Simulator,name=iPhone 14'`
-- **Run a single test**: `xcodebuild test -scheme Test0802 -destination 'platform=iOS Simulator,name=iPhone 14' -only-testing:Test0802Tests/YourTestClassName/testYourFunction`
+- **Build**: `xcodebuild build -scheme Momentum -destination 'platform=iOS Simulator,name=iPhone 14'`
+- **Run all tests**: `xcodebuild test -scheme Momentum -destination 'platform=iOS Simulator,name=iPhone 14'`
+- **Run a single test**: `xcodebuild test -scheme Momentum -destination 'platform=iOS Simulator,name=iPhone 14' -only-testing:MomentumTests/YourTestClassName/testYourFunction`
 - **Lint**: `swiftlint` (assuming SwiftLint is installed and configured)
 
 ## Code Style

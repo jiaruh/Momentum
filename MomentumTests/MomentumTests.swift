@@ -8,7 +8,7 @@
 import Testing
 @testable import Test0802
 
-struct Test0802Tests {
+struct MomentumTests {
 
     @Test func example() async throws {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.

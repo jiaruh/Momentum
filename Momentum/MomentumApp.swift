@@ -1,6 +1,6 @@
 //
-//  Test0802App.swift
-//  Test0802
+//  MomentumApp.swift
+//  Momentum
 //
 //  Created by jiaruh on 2/8/2025.
 //
