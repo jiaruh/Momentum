@@ -46,10 +46,10 @@ jobs:
     
     - name: Build Documentation
         run: |
-        swift package generate-documentation --target MomentumCore
-        swift package generate-documentation --target MomentumAuthentication
-        swift package generate-documentation --target MomentumUI
-        swift package generate-documentation --target MomentumFeatures
+          swift package generate-documentation --target MomentumCore
+          swift package generate-documentation --target MomentumAuthentication
+          swift package generate-documentation --target MomentumUI
+          swift package generate-documentation --target MomentumFeatures
     
     - name: Export Documentation Archive
       run: |
