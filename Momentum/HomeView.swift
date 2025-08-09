@@ -6,17 +6,15 @@
 //
 
 import SwiftUI
-import CoreData
+import SwiftData
 
 struct HomeView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.createdAt, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Item.createdAt, order: .reverse) private var items: [Item]
 
     @State private var showingAddTaskView = false
+
+    public init() {}
 
     var body: some View {
         NavigationView {
@@ -44,7 +42,6 @@ struct HomeView: View {
                 }
                 .sheet(isPresented: $showingAddTaskView) {
                     AddTaskView()
-                        .environment(\.managedObjectContext, self.viewContext)
                 }
                 
                 VStack {
@@ -68,30 +65,21 @@ struct HomeView: View {
 
     private func deleteItems(offsets: IndexSet) {
         withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-            saveContext()
-        }
-    }
-    
-    private func saveContext() {
-        do {
-            try viewContext.save()
-        } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            for index in offsets {
+                modelContext.delete(items[index])
+            }
         }
     }
 }
 
 struct TaskRow: View {
-    @ObservedObject var item: Item
+    let item: Item
     @State private var showingEditTaskView = false
     
     var body: some View {
         HStack {
             Button(action: {
                 item.isCompleted.toggle()
-                saveContext()
             }) {
                 Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(item.isCompleted ? .green : .primary)
@@ -99,7 +87,7 @@ struct TaskRow: View {
             .buttonStyle(PlainButtonStyle())
 
             VStack(alignment: .leading) {
-                Text(item.task ?? "Untitled")
+                Text(item.task)
                     .strikethrough(item.isCompleted, color: .primary)
                     .foregroundColor(item.isCompleted ? .secondary : .primary)
                 
@@ -148,18 +136,11 @@ struct TaskRow: View {
         }
     }
     
-    private func saveContext() {
-        do {
-            try item.managedObjectContext?.save()
-        } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-        }
-    }
+    
 }
 
 struct AddTaskView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.presentationMode) var presentationMode
     
     @State private var task: String = ""
@@ -205,66 +186,43 @@ struct AddTaskView: View {
     
     private func addItem() {
         withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.createdAt = Date()
-            newItem.task = task
-            newItem.isCompleted = false
-            newItem.priority = priority.rawValue
-            newItem.dueDate = dueDate
-            
-            saveContext()
+            let newItem = Item(
+                task: task,
+                dueDate: dueDate,
+                priority: priority.rawValue
+            )
+            modelContext.insert(newItem)
             
             presentationMode.wrappedValue.dismiss()
-        }
-    }
-    
-    private func saveContext() {
-        do {
-            try viewContext.save()
-        } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
         }
     }
 }
 
 struct EditTaskView: View {
-    @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.presentationMode) var presentationMode
     
-    @ObservedObject var item: Item
-    
-    @State private var task: String
-    @State private var priority: AddTaskView.Priority
-    @State private var dueDate: Date
-
-    init(item: Item) {
-        self.item = item
-        _task = State(initialValue: item.task ?? "")
-        _priority = State(initialValue: AddTaskView.Priority(rawValue: item.priority ?? "Normal") ?? .normal)
-        _dueDate = State(initialValue: item.dueDate ?? Date())
-    }
+    @Bindable var item: Item
     
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("Task Details")) {
-                    TextField("Task name", text: $task)
+                    TextField("Task name", text: $item.task)
                     
-                    Picker("Priority", selection: $priority) {
+                    Picker("Priority", selection: $item.priority) {
                         ForEach(AddTaskView.Priority.allCases) { priority in
-                            Text(priority.rawValue).tag(priority)
+                            Text(priority.rawValue).tag(priority.rawValue as String?)
                         }
                     }
                     
-                    DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
+                    DatePicker("Due Date", selection: Binding(get: { item.dueDate ?? Date() }, set: { item.dueDate = $0 }), displayedComponents: .date)
                 }
                 
                 Section {
                     Button("Save Changes") {
-                        saveChanges()
+                        presentationMode.wrappedValue.dismiss()
                     }
-                    .disabled(task.isEmpty)
+                    .disabled(item.task.isEmpty)
                 }
             }
             .navigationTitle("Edit Task")
@@ -273,30 +231,9 @@ struct EditTaskView: View {
             })
         }
     }
-    
-    private func saveChanges() {
-        withAnimation {
-            item.task = task
-            item.priority = priority.rawValue
-            item.dueDate = dueDate
-            item.editedAt = Date()
-            
-            saveContext()
-            
-            presentationMode.wrappedValue.dismiss()
-        }
-    }
-    
-    private func saveContext() {
-        do {
-            try viewContext.save()
-        } catch {
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-        }
-    }
 }
 
 #Preview {
-    HomeView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    HomeView()
+        .modelContainer(for: Item.self, inMemory: true)
 }

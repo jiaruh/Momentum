@@ -6,10 +6,9 @@
 //
 
 import SwiftUI
-import CoreData
+import SwiftData
 
 struct CalendarView: View {
-    @Environment(\.managedObjectContext) private var viewContext
     @State private var selectedDate = Date()
 
     var body: some View {
@@ -41,32 +40,28 @@ struct CalendarView: View {
 }
 
 struct TasksForDateView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-    @FetchRequest var items: FetchedResults<Item>
+    @Query private var items: [Item]
 
     let date: Date
 
-    init(date: Date) {
-        self.date = date
-        let calendar = Calendar.current
-        let startDate = calendar.startOfDay(for: date)
-        let endDate = calendar.date(byAdding: .day, value: 1, to: startDate)!
-
-        _items = FetchRequest<Item>(
-            sortDescriptors: [NSSortDescriptor(keyPath: \Item.createdAt, ascending: true)],
-            predicate: NSPredicate(format: "dueDate >= %@ AND dueDate < %@", startDate as NSDate, endDate as NSDate)
-        )
+    var filteredItems: [Item] {
+        items.filter { item in
+            if let dueDate = item.dueDate {
+                return Calendar.current.isDate(dueDate, inSameDayAs: date)
+            }
+            return false
+        }
     }
 
     var body: some View {
         VStack {
-            if items.isEmpty {
+            if filteredItems.isEmpty {
                 Text("No tasks for this day.")
                     .foregroundColor(.gray)
                 Spacer()
             } else {
                 List {
-                    ForEach(items) { item in
+                    ForEach(filteredItems) { item in
                         TaskRow(item: item)
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
@@ -79,5 +74,6 @@ struct TasksForDateView: View {
 }
 
 #Preview {
-    CalendarView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    CalendarView()
+        .modelContainer(for: Item.self, inMemory: true)
 }

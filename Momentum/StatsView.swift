@@ -6,15 +6,10 @@
 //
 
 import SwiftUI
-import CoreData
+import SwiftData
 
 struct StatsView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-    
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.createdAt, ascending: false)],
-        animation: .default)
-    private var allTasks: FetchedResults<Item>
+    @Query(sort: \Item.createdAt, order: .reverse) private var allTasks: [Item]
     
     var body: some View {
         NavigationView {
@@ -221,8 +216,7 @@ struct WeeklyProgressView: View {
         
         return weekdays.map { date in
             let dayTasks = tasks.filter { task in
-                guard let taskDate = task.createdAt else { return false }
-                return calendar.isDate(taskDate, inSameDayAs: date)
+                return calendar.isDate(task.createdAt, inSameDayAs: date)
             }
             let completed = dayTasks.filter { $0.isCompleted }.count
             
@@ -300,21 +294,19 @@ struct RecentActivityView: View {
                     .padding(.vertical, 20)
             } else {
                 VStack(spacing: 8) {
-                    ForEach(Array(tasks.enumerated()), id: \.element.objectID) { index, task in
+                    ForEach(Array(tasks.enumerated()), id: \.element.hashValue) { index, task in
                         HStack {
                             Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
                                 .foregroundColor(task.isCompleted ? .green : .gray)
                             
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(task.task ?? "Untitled")
+                                Text(task.task)
                                     .font(.subheadline)
                                     .strikethrough(task.isCompleted, color: .primary)
                                 
-                                if let createdAt = task.createdAt {
-                                    Text(createdAt, style: .relative)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
+                                Text(task.createdAt, style: .relative)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                             }
                             
                             Spacer()
@@ -359,5 +351,6 @@ struct RecentActivityView: View {
 }
 
 #Preview {
-    StatsView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+    StatsView()
+        .modelContainer(for: Item.self, inMemory: true)
 }
