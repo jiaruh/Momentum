@@ -9,25 +9,42 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var authService = AuthenticationService()
+
     var body: some View {
-        TabView {
-            HomeView()
-                .tabItem {
-                    Image(systemName: "house.fill")
-                    Text("Home")
+        Group {
+            if authService.isAuthenticated {
+                TabView {
+                    HomeView()
+                        .tabItem {
+                            Image(systemName: "house.fill")
+                            Text("Home")
+                        }
+                    
+                    CalendarView()
+                        .tabItem {
+                            Image(systemName: "calendar")
+                            Text("Calendar")
+                        }
+                    
+                    StatsView()
+                        .tabItem {
+                            Image(systemName: "chart.bar.fill")
+                            Text("Stats")
+                        }
                 }
-            
-            CalendarView()
-                .tabItem {
-                    Image(systemName: "calendar")
-                    Text("Calendar")
+            } else {
+                VStack {
+                    Text("Locked")
+                        .font(.largeTitle)
+                    Button("Unlock with Face ID") {
+                        authService.authenticate()
+                    }
                 }
-            
-            StatsView()
-                .tabItem {
-                    Image(systemName: "chart.bar.fill")
-                    Text("Stats")
-                }
+            }
+        }
+        .onAppear {
+            authService.authenticate()
         }
     }
 }
