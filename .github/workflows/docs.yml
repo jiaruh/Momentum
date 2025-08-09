@@ -51,19 +51,19 @@ jobs:
           # Create index.html redirect if it doesn't exist
           if [ ! -f "./docs/index.html" ]; then
             cat > ./docs/index.html << 'EOF'
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Momentum Documentation</title>
-    <meta http-equiv="refresh" content="0; url=./documentation/momentum/">
-    <link rel="canonical" href="./documentation/momentum/">
-</head>
-<body>
-    <p>Redirecting to <a href="./documentation/momentum/">Momentum Documentation</a>...</p>
-</body>
-</html>
-EOF
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Momentum Documentation</title>
+            <meta http-equiv="refresh" content="0; url=./documentation/momentum/">
+            <link rel="canonical" href="./documentation/momentum/">
+        </head>
+        <body>
+            <p>Redirecting to <a href="./documentation/momentum/">Momentum Documentation</a>...</p>
+        </body>
+        </html>
+        EOF
           fi
         else
           echo "No documentation archive found"
