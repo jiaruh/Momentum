@@ -40,7 +40,7 @@ jobs:
         xcodebuild clean build \
           -project Momentum.xcodeproj \
           -target Momentum \
-          -destination 'generic/platform=iOS Simulator' \
+          -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.0' \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO
     
@@ -48,7 +48,7 @@ jobs:
       run: |
         xcodebuild docbuild \
           -scheme Momentum \
-          -destination 'generic/platform=iOS Simulator' \
+          -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.0' \
           -derivedDataPath ./DerivedData
     
     - name: Export Documentation Archive
