@@ -12,5 +12,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: 'latest'
     - name: Build
       run: xcodebuild clean build -project Momentum.xcodeproj -scheme Momentum CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO

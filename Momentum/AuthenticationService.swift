@@ -5,7 +5,6 @@ import LocalAuthentication
 class AuthenticationService: ObservableObject {
     @Published var isAuthenticated = false
     
-    @MainActor
     func authenticate() {
         let context = LAContext()
         var error: NSError?
@@ -15,7 +14,9 @@ class AuthenticationService: ObservableObject {
             
             context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
                 if success {
-                    self.isAuthenticated = true
+                    Task { @MainActor in
+                        self.isAuthenticated = true
+                    }
                 } else {
                     // Handle error
                 }
