@@ -12,10 +12,10 @@ class AuthenticationService: ObservableObject {
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
             let reason = "Please authenticate to unlock your moments."
             
-            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
+            context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { [weak self] success, authenticationError in
                 DispatchQueue.main.async {
                     if success {
-                        self.isAuthenticated = true
+                        self?.isAuthenticated = true
                     } else {
                         // Handle error
                     }
