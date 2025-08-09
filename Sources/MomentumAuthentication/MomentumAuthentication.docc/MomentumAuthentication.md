@@ -54,6 +54,4 @@ struct ContentView: View {
 
 ## Requirements
 
-- iOS 17.0+
-- Device with Face ID or Touch ID capability
-- Proper Info.plist configuration for `NSFaceIDUsageDescription`
+This module requires iOS 17.0 or later, a device with Face ID or Touch ID capability, and proper Info.plist configuration for `NSFaceIDUsageDescription`.

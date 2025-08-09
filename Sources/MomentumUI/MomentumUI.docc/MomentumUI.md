@@ -96,7 +96,4 @@ struct TaskManagementView: View {
 
 ## Design Principles
 
-- Consistency: All components follow the same visual design language
-- Accessibility: Components support VoiceOver and other accessibility features
-- Responsiveness: Components adapt to different screen sizes and orientations
-- Modularity: Each component is self-contained and reusable
+All UI components in MomentumUI follow consistent design principles: they maintain the same visual design language, support VoiceOver and other accessibility features, adapt to different screen sizes and orientations, and are self-contained and reusable.

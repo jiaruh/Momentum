@@ -36,25 +36,13 @@ struct MomentumApp: App {
 ### Feature Overview
 
 #### Home View
-The main task management interface where users can:
-- View all tasks in a list
-- Add new tasks
-- Mark tasks as complete
-- Navigate to task details
-- Delete tasks
+The main task management interface where users can view all tasks in a list, add new tasks, mark tasks as complete, navigate to task details, and delete tasks.
 
 #### Calendar View
-A calendar-based view for:
-- Viewing tasks by date
-- Understanding task distribution over time
-- Managing due dates
+A calendar-based view for viewing tasks by date, understanding task distribution over time, and managing due dates.
 
 #### Stats View
-Analytics and statistics including:
-- Task completion rates
-- Priority distribution
-- Progress tracking
-- Visual charts and metrics
+Analytics and statistics including task completion rates, priority distribution, progress tracking, and visual charts and metrics.
 
 ### Authentication Integration
 
@@ -80,8 +68,4 @@ struct ContentView: View {
 
 ## Dependencies
 
-- ``MomentumCore``: Data models and utilities
-- ``MomentumAuthentication``: Biometric authentication
-- ``MomentumUI``: Reusable UI components
-- SwiftUI: User interface framework
-- SwiftData: Data persistence
+This module integrates with MomentumCore for data models and utilities, MomentumAuthentication for biometric authentication, MomentumUI for reusable UI components, SwiftUI for the user interface framework, and SwiftData for data persistence.
