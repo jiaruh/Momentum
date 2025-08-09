@@ -1,17 +1,14 @@
-//
-//  CalendarView.swift
-//  Momentum
-//
-//  Created by jiaruh on 2/8/2025.
-//
-
 import SwiftUI
 import SwiftData
+import MomentumCore
+import MomentumUI
 
-struct CalendarView: View {
+public struct CalendarView: View {
     @State private var selectedDate = Date()
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         NavigationView {
             ZStack {
                 LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.4), Color.purple.opacity(0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -71,9 +68,4 @@ struct TasksForDateView: View {
             }
         }
     }
-}
-
-#Preview {
-    CalendarView()
-        .modelContainer(for: Item.self, inMemory: true)
 }

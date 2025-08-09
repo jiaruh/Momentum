@@ -7,6 +7,8 @@
 
 import SwiftUI
 import SwiftData
+import MomentumCore
+import MomentumFeatures
 
 @main
 struct MomentumApp: App {

@@ -1,17 +1,12 @@
-
-//
-//  ContentView.swift
-//  Momentum
-//
-//  Created by jiaruh on 2/8/2025.
-//
-
 import SwiftUI
+import MomentumAuthentication
 
-struct ContentView: View {
+public struct ContentView: View {
     @StateObject private var authService = AuthenticationService()
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         Group {
             if authService.isAuthenticated {
                 TabView {
@@ -47,8 +42,4 @@ struct ContentView: View {
             authService.authenticate()
         }
     }
-}
-
-#Preview {
-    ContentView()
 }

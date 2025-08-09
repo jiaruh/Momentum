@@ -1,11 +1,13 @@
-
 import Combine
 import LocalAuthentication
+import Foundation
 
-class AuthenticationService: ObservableObject {
-    @Published var isAuthenticated = false
+public class AuthenticationService: ObservableObject {
+    @Published public var isAuthenticated = false
     
-    func authenticate() {
+    public init() {}
+    
+    public func authenticate() {
         let context = LAContext()
         var error: NSError?
         
@@ -19,10 +21,16 @@ class AuthenticationService: ObservableObject {
                     }
                 } else {
                     // Handle error
+                    print("Authentication failed: \(authenticationError?.localizedDescription ?? "Unknown error")")
                 }
             }
         } else {
-            // No biometrics
+            // No biometrics available
+            print("Biometric authentication not available: \(error?.localizedDescription ?? "Unknown error")")
         }
+    }
+    
+    public func logout() {
+        isAuthenticated = false
     }
 }

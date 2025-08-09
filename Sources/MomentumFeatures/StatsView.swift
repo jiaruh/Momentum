@@ -1,17 +1,14 @@
-//
-//  StatsView.swift
-//  Momentum
-//
-//  Created by jiaruh on 2/8/2025.
-//
-
 import SwiftUI
 import SwiftData
+import MomentumCore
+import MomentumUI
 
-struct StatsView: View {
+public struct StatsView: View {
     @Query(sort: \Item.createdAt, order: .reverse) private var allTasks: [Item]
     
-    var body: some View {
+    public init() {}
+    
+    public var body: some View {
         NavigationView {
             ZStack {
                 LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.4), Color.purple.opacity(0.6)]), startPoint: .topLeading, endPoint: .bottomTrailing)
@@ -70,38 +67,6 @@ struct StatsView: View {
     private func isOverdue(_ task: Item) -> Bool {
         guard let dueDate = task.dueDate else { return false }
         return dueDate < Date() && !task.isCompleted
-    }
-}
-
-struct StatCard: View {
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            HStack {
-                Image(systemName: icon)
-                    .foregroundColor(color)
-                    .font(.title2)
-                Spacer()
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(value)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                Text(title)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding()
-        .background(Color.white.opacity(0.9))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
     }
 }
 
@@ -348,9 +313,4 @@ struct RecentActivityView: View {
             return .gray
         }
     }
-}
-
-#Preview {
-    StatsView()
-        .modelContainer(for: Item.self, inMemory: true)
 }

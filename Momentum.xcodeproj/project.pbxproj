@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CF7430792E4766A700CE3356 /* MomentumAuthentication in Frameworks */ = {isa = PBXBuildFile; productRef = CF7430782E4766A700CE3356 /* MomentumAuthentication */; };
+		CF74307B2E4766A700CE3356 /* MomentumCore in Frameworks */ = {isa = PBXBuildFile; productRef = CF74307A2E4766A700CE3356 /* MomentumCore */; };
+		CF74307D2E4766A700CE3356 /* MomentumFeatures in Frameworks */ = {isa = PBXBuildFile; productRef = CF74307C2E4766A700CE3356 /* MomentumFeatures */; };
+		CF74307F2E4766A700CE3356 /* MomentumUI in Frameworks */ = {isa = PBXBuildFile; productRef = CF74307E2E4766A700CE3356 /* MomentumUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		CF2560DC2E3D1FB500BAB443 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +59,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CF74307D2E4766A700CE3356 /* MomentumFeatures in Frameworks */,
+				CF7430792E4766A700CE3356 /* MomentumAuthentication in Frameworks */,
+				CF74307F2E4766A700CE3356 /* MomentumUI in Frameworks */,
+				CF74307B2E4766A700CE3356 /* MomentumCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +89,7 @@
 				CF2560CB2E3D1FB000BAB443 /* Momentum */,
 				CF2560DE2E3D1FB500BAB443 /* MomentumTests */,
 				CF2560E82E3D1FB500BAB443 /* MomentumUITests */,
+				CF7430772E4766A700CE3356 /* Frameworks */,
 				CF2560CA2E3D1FB000BAB443 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +102,13 @@
 				CF2560E52E3D1FB500BAB443 /* MomentumUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		CF7430772E4766A700CE3356 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -112,6 +131,10 @@
 			);
 			name = Momentum;
 			packageProductDependencies = (
+				CF7430782E4766A700CE3356 /* MomentumAuthentication */,
+				CF74307A2E4766A700CE3356 /* MomentumCore */,
+				CF74307C2E4766A700CE3356 /* MomentumFeatures */,
+				CF74307E2E4766A700CE3356 /* MomentumUI */,
 			);
 			productName = Momentum;
 			productReference = CF2560C92E3D1FB000BAB443 /* Momentum.app */;
@@ -195,6 +218,9 @@
 			);
 			mainGroup = CF2560C02E3D1FB000BAB443;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CF74306C2E47664D00CE3356 /* XCLocalSwiftPackageReference "../Momentum" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CF2560CA2E3D1FB000BAB443 /* Products */;
 			projectDirPath = "";
@@ -582,6 +608,36 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		CF74306C2E47664D00CE3356 /* XCLocalSwiftPackageReference "../Momentum" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Momentum;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CF7430782E4766A700CE3356 /* MomentumAuthentication */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CF74306C2E47664D00CE3356 /* XCLocalSwiftPackageReference "../Momentum" */;
+			productName = MomentumAuthentication;
+		};
+		CF74307A2E4766A700CE3356 /* MomentumCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CF74306C2E47664D00CE3356 /* XCLocalSwiftPackageReference "../Momentum" */;
+			productName = MomentumCore;
+		};
+		CF74307C2E4766A700CE3356 /* MomentumFeatures */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CF74306C2E47664D00CE3356 /* XCLocalSwiftPackageReference "../Momentum" */;
+			productName = MomentumFeatures;
+		};
+		CF74307E2E4766A700CE3356 /* MomentumUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CF74306C2E47664D00CE3356 /* XCLocalSwiftPackageReference "../Momentum" */;
+			productName = MomentumUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CF2560C12E3D1FB000BAB443 /* Project object */;
 }
