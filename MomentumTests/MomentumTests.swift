@@ -1,12 +1,12 @@
 //
-//  Test0802Tests.swift
-//  Test0802Tests
+//  MomentumTests.swift
+//  MomentumTests
 //
 //  Created by jiaruh on 2/8/2025.
 //
 
 import Testing
-@testable import Test0802
+@testable import Momentum
 
 struct MomentumTests {
 

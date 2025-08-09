@@ -1,6 +1,6 @@
 //
-//  Test0802UITestsLaunchTests.swift
-//  Test0802UITests
+//  MomentumUITestsLaunchTests.swift
+//  MomentumUITests
 //
 //  Created by jiaruh on 2/8/2025.
 //

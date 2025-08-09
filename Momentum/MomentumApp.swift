@@ -9,7 +9,7 @@ import SwiftUI
 import CoreData
 
 @main
-struct Test0802App: App {
+struct MomentumApp: App {
     let persistenceController = PersistenceController.shared
 
     var body: some Scene {
