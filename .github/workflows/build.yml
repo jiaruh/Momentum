@@ -45,27 +45,18 @@ jobs:
           CODE_SIGNING_REQUIRED=NO
     
     - name: Build Documentation
-      run: |
-        xcodebuild docbuild \
-          -scheme Momentum \
-          -destination 'platform=macOS' \
-          -derivedDataPath ./DerivedData
+        run: |
+        swift package generate-documentation --target MomentumCore
+        swift package generate-documentation --target MomentumAuthentication
+        swift package generate-documentation --target MomentumUI
+        swift package generate-documentation --target MomentumFeatures
     
     - name: Export Documentation Archive
       run: |
-        # Find the generated documentation archive
-        DOCC_ARCHIVE=$(find ./DerivedData -name "*.doccarchive" -type d | head -1)
-        if [ -n "$DOCC_ARCHIVE" ]; then
-          echo "Found documentation archive: $DOCC_ARCHIVE"
-          # Convert to static website
-          xcrun docc process-archive transform-for-static-hosting \
-            "$DOCC_ARCHIVE" \
-            --output-path ./docs \
-            --hosting-base-path "/Momentum"
-          echo "Documentation exported to ./docs"
-        else
-          echo "No documentation archive found"
-          exit 1
+        # Swift package generate-documentation creates docs in .build/plugins/Swift-DocC/outputs/
+        mkdir -p ./docs
+        if [ -d ".build/plugins/Swift-DocC/outputs" ]; then
+          cp -r .build/plugins/Swift-DocC/outputs/* ./docs/
         fi
     
     - name: Upload Documentation Artifact

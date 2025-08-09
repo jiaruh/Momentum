@@ -29,45 +29,18 @@ jobs:
         xcode-version: 'latest'
     
     - name: Build Documentation
-      run: |
-        xcodebuild docbuild \
-          -scheme Momentum \
-          -destination 'platform=macOS' \
-          -derivedDataPath ./DerivedData
+        run: |
+        swift package generate-documentation --target MomentumCore
+        swift package generate-documentation --target MomentumAuthentication
+        swift package generate-documentation --target MomentumUI
+        swift package generate-documentation --target MomentumFeatures
     
     - name: Process Documentation Archive
       run: |
-        # Find the generated documentation archive
-        DOCC_ARCHIVE=$(find ./DerivedData -name "*.doccarchive" -type d | head -1)
-        if [ -n "$DOCC_ARCHIVE" ]; then
-          echo "Found documentation archive: $DOCC_ARCHIVE"
-          # Convert to static website for GitHub Pages
-          xcrun docc process-archive transform-for-static-hosting \
-            "$DOCC_ARCHIVE" \
-            --output-path ./docs \
-            --hosting-base-path "/Momentum"
-          echo "Documentation processed for GitHub Pages"
-          
-          # Create index.html redirect if it doesn't exist
-          if [ ! -f "./docs/index.html" ]; then
-            cat > ./docs/index.html << 'EOF'
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Momentum Documentation</title>
-    <meta http-equiv="refresh" content="0; url=./documentation/momentum/">
-    <link rel="canonical" href="./documentation/momentum/">
-</head>
-<body>
-    <p>Redirecting to <a href="./documentation/momentum/">Momentum Documentation</a>...</p>
-</body>
-</html>
-EOF
-          fi
-        else
-          echo "No documentation archive found"
-          exit 1
+        # Swift package generate-documentation creates docs in .build/plugins/Swift-DocC/outputs/
+        mkdir -p ./docs
+        if [ -d ".build/plugins/Swift-DocC/outputs" ]; then
+          cp -r .build/plugins/Swift-DocC/outputs/* ./docs/
         fi
     
     - name: Setup Pages
