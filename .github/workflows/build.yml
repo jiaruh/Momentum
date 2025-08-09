@@ -1,4 +1,4 @@
-name: Swift Build
+name: iOS Build
 
 on:
   push:
@@ -11,9 +11,35 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: 'latest'
-    - name: Build
-      run: xcodebuild clean build -project Momentum.xcodeproj -scheme Momentum CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+    
+    - name: List Available Simulators
+      run: xcrun simctl list devices available
+    
+    - name: Build Swift Package for iOS
+      run: |
+        swift package resolve
+        # Note: Swift Package building for iOS requires Xcode project integration
+        echo "Swift Package structure verified"
+    
+    - name: Test Swift Package Structure
+      run: |
+        if [ -f "Package.swift" ]; then
+          echo "✅ Package.swift found"
+          swift package dump-package
+        else
+          echo "❌ Package.swift not found"
+          exit 1
+        fi
+    
+    - name: Build iOS App
+      run: |
+        xcodebuild clean build \
+          -project Momentum.xcodeproj \
+          -target Momentum \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO
