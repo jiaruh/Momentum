@@ -16,7 +16,7 @@ let package = Package(
         .library(name: "MomentumFeatures", targets: ["MomentumFeatures"])
     ],
     dependencies: [
-        // Add external dependencies here if needed
+        .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.1.0")
     ],
     targets: [
         // Core module - Data models and shared utilities

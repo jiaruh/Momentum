@@ -22,6 +22,7 @@ import SwiftData
 ///     detailsText: "Include charts and statistics"
 /// )
 /// ```
+@available(iOS 17.0, macOS 14.0, *)
 @Model
 public final class Item {
     /// The date and time when the task was created.
