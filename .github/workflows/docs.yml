@@ -32,7 +32,7 @@ jobs:
       run: |
         xcodebuild docbuild \
           -scheme Momentum \
-          -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.0' \
+          -destination 'generic/platform=iOS Simulator' \
           -derivedDataPath ./DerivedData
     
     - name: Process Documentation Archive
