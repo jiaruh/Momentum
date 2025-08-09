@@ -7,6 +7,8 @@
 
 import SwiftUI
 import SwiftData
+import PhotosUI
+import UIKit
 
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
@@ -91,6 +93,24 @@ struct TaskRow: View {
                     .strikethrough(item.isCompleted, color: .primary)
                     .foregroundColor(item.isCompleted ? .secondary : .primary)
                 
+                if let detailsText = item.detailsText, !detailsText.isEmpty {
+                    Text(detailsText)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                }
+                
+                if item.imageData != nil {
+                    HStack {
+                        Image(systemName: "photo")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                        Text("Image attached")
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                    }
+                }
+                
                 if let dueDate = item.dueDate {
                     Text("Due: \(dueDate, style: .date)")
                         .font(.caption)
@@ -111,6 +131,12 @@ struct TaskRow: View {
             }) {
                 Image(systemName: "pencil.circle.fill")
                     .foregroundColor(.blue)
+            }
+            .buttonStyle(PlainButtonStyle())
+
+            NavigationLink(destination: TaskDetailView(item: item)) {
+                Image(systemName: "chevron.right.circle.fill")
+                    .foregroundColor(.gray)
             }
             .buttonStyle(PlainButtonStyle())
         }
@@ -146,6 +172,9 @@ struct AddTaskView: View {
     @State private var task: String = ""
     @State private var priority: Priority = .normal
     @State private var dueDate = Date()
+    @State private var detailsText: String = ""
+    @State private var selectedImageItem: PhotosPickerItem?
+    @State private var imageData: Data?
 
     enum Priority: String, CaseIterable, Identifiable {
         case low = "Low"
@@ -170,6 +199,29 @@ struct AddTaskView: View {
                     DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
                 }
                 
+                Section(header: Text("Additional Details")) {
+                    TextField("Description or notes", text: $detailsText, axis: .vertical)
+                        .lineLimit(3...6)
+                    
+                    PhotosPicker("Add Image", selection: $selectedImageItem, matching: .images)
+                        .onChange(of: selectedImageItem) { newValue in
+                            Task {
+                                if let data = try? await newValue?.loadTransferable(type: Data.self) {
+                                    imageData = data
+                                }
+                            }
+                        }
+                    
+                    if let imageData = imageData,
+                       let uiImage = UIImage(data: imageData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxHeight: 200)
+                            .cornerRadius(8)
+                    }
+                }
+                
                 Section {
                     Button("Add Task") {
                         addItem()
@@ -188,8 +240,12 @@ struct AddTaskView: View {
         withAnimation {
             let newItem = Item(
                 task: task,
+                isCompleted: false,
                 dueDate: dueDate,
-                priority: priority.rawValue
+                priority: priority.rawValue,
+                editedAt: nil,
+                detailsText: detailsText.isEmpty ? nil : detailsText,
+                imageData: imageData
             )
             modelContext.insert(newItem)
             
@@ -202,6 +258,9 @@ struct EditTaskView: View {
     @Environment(\.presentationMode) var presentationMode
     
     @Bindable var item: Item
+    @State private var tempDetailsText: String = ""
+    @State private var selectedImageItem: PhotosPickerItem?
+    @State private var tempImageData: Data?
     
     var body: some View {
         NavigationView {
@@ -218,8 +277,46 @@ struct EditTaskView: View {
                     DatePicker("Due Date", selection: Binding(get: { item.dueDate ?? Date() }, set: { item.dueDate = $0 }), displayedComponents: .date)
                 }
                 
+                Section(header: Text("Additional Details")) {
+                    TextField("Description or notes", text: $tempDetailsText, axis: .vertical)
+                        .lineLimit(3...6)
+                        .onAppear {
+                            tempDetailsText = item.detailsText ?? ""
+                            tempImageData = item.imageData
+                        }
+                    
+                    PhotosPicker("Change Image", selection: $selectedImageItem, matching: .images)
+                        .onChange(of: selectedImageItem) { newValue in
+                            Task {
+                                if let data = try? await newValue?.loadTransferable(type: Data.self) {
+                                    tempImageData = data
+                                }
+                            }
+                        }
+                    
+                    if let imageData = tempImageData,
+                       let uiImage = UIImage(data: imageData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxHeight: 200)
+                            .cornerRadius(8)
+                    }
+                    
+                    if tempImageData != nil {
+                        Button(role: .destructive) {
+                            tempImageData = nil
+                        } label: {
+                            Label("Remove Image", systemImage: "trash")
+                        }
+                    }
+                }
+                
                 Section {
                     Button("Save Changes") {
+                        item.detailsText = tempDetailsText.isEmpty ? nil : tempDetailsText
+                        item.imageData = tempImageData
+                        item.editedAt = Date()
                         presentationMode.wrappedValue.dismiss()
                     }
                     .disabled(item.task.isEmpty)
@@ -236,4 +333,87 @@ struct EditTaskView: View {
 #Preview {
     HomeView()
         .modelContainer(for: Item.self, inMemory: true)
+}
+
+struct TaskDetailView: View {
+    let item: Item
+    @State private var showingEdit = false
+
+    private func priorityColor(for priority: String) -> Color {
+        switch priority {
+        case "High": return .red
+        case "Normal": return .orange
+        case "Low": return .green
+        default: return .primary
+        }
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top) {
+                    Text(item.task)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .multilineTextAlignment(.leading)
+                    Spacer()
+                    if let priority = item.priority {
+                        Text(priority)
+                            .font(.caption)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(priorityColor(for: priority).opacity(0.15))
+                            .foregroundColor(priorityColor(for: priority))
+                            .cornerRadius(8)
+                    }
+                }
+
+                if let dueDate = item.dueDate {
+                    HStack(spacing: 6) {
+                        Image(systemName: "calendar")
+                            .foregroundColor(.secondary)
+                        Text("Due: \(dueDate, style: .date)")
+                            .foregroundColor(.secondary)
+                            .font(.subheadline)
+                    }
+                }
+
+                if let details = item.detailsText, !details.isEmpty {
+                    Text(details)
+                        .font(.body)
+                        .foregroundColor(.primary)
+                        .multilineTextAlignment(.leading)
+                }
+
+                if let data = item.imageData, let uiImage = UIImage(data: data) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .cornerRadius(12)
+                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+                }
+
+                Spacer(minLength: 0)
+            }
+            .padding()
+        }
+        .background(
+            LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.08), Color.purple.opacity(0.12)]), startPoint: .topLeading, endPoint: .bottomTrailing)
+                .ignoresSafeArea()
+        )
+        .navigationTitle("Task Detail")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    showingEdit = true
+                } label: {
+                    Image(systemName: "pencil")
+                }
+            }
+        }
+        .sheet(isPresented: $showingEdit) {
+            EditTaskView(item: item)
+        }
+    }
 }
