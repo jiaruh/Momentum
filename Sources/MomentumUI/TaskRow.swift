@@ -19,41 +19,44 @@ public struct TaskRow: View {
             }
             .buttonStyle(PlainButtonStyle())
             
-            VStack(alignment: .leading) {
-                Text(item.task)
-                    .strikethrough(item.isCompleted, color: .primary)
-                    .foregroundColor(item.isCompleted ? .secondary : .primary)
-                
-                if let detailsText = item.detailsText, !detailsText.isEmpty {
-                    Text(detailsText)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                }
-                
-                if item.imageData != nil {
-                    HStack {
-                        Image(systemName: "photo")
+            NavigationLink(destination: TaskDetailView(item: item)) {
+                VStack(alignment: .leading) {
+                    Text(item.task)
+                        .strikethrough(item.isCompleted, color: .primary)
+                        .foregroundColor(item.isCompleted ? .secondary : .primary)
+                    
+                    if let detailsText = item.detailsText, !detailsText.isEmpty {
+                        Text(detailsText)
                             .font(.caption)
-                            .foregroundColor(.blue)
-                        Text("Image attached")
+                            .foregroundColor(.secondary)
+                            .lineLimit(2)
+                    }
+                    
+                    if item.imageData != nil {
+                        HStack {
+                            Image(systemName: "photo")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                            Text("Image attached")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    
+                    if let dueDate = item.dueDate {
+                        Text("Due: \(dueDate, style: .date)")
                             .font(.caption)
-                            .foregroundColor(.blue)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    if let priority = item.priority {
+                        Text("Priority: \(priority)")
+                            .font(.caption)
+                            .foregroundColor(priorityColor(for: priority))
                     }
                 }
-                
-                if let dueDate = item.dueDate {
-                    Text("Due: \(dueDate, style: .date)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
-                if let priority = item.priority {
-                    Text("Priority: \(priority)")
-                        .font(.caption)
-                        .foregroundColor(priorityColor(for: priority))
-                }
             }
+            .buttonStyle(PlainButtonStyle())
             
             Spacer()
         }
@@ -61,6 +64,15 @@ public struct TaskRow: View {
         .background(Color.white.opacity(0.9))
         .cornerRadius(10)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+        .swipeActions(edge: .leading) {
+            Button("Edit") {
+                showingEditTaskView = true
+            }
+            .tint(.blue)
+        }
+        .sheet(isPresented: $showingEditTaskView) {
+            EditTaskView(item: item)
+        }
     }
     
     private func priorityColor(for priority: String) -> Color {
