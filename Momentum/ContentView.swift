@@ -22,6 +22,12 @@ struct ContentView: View {
                     Image(systemName: "calendar")
                     Text("Calendar")
                 }
+            
+            StatsView()
+                .tabItem {
+                    Image(systemName: "chart.bar.fill")
+                    Text("Stats")
+                }
         }
     }
 }
