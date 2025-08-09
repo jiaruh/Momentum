@@ -13,4 +13,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build
-      run: xcodebuild clean build -project Test0802.xcodeproj -scheme Test0802
+      run: xcodebuild clean build -project Test0802.xcodeproj -scheme Test0802 CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
