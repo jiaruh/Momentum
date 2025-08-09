@@ -4,8 +4,45 @@ import PhotosUI
 import UIKit
 import MomentumCore
 
+/// A form-based view for editing existing tasks.
+///
+/// `EditTaskView` provides a comprehensive interface for modifying all aspects
+/// of a task including its name, priority, due date, description, and image attachments.
+///
+/// ## Features
+///
+/// - Task name editing
+/// - Priority level selection
+/// - Optional due date setting
+/// - Multi-line description editing
+/// - Image attachment management (add/change/remove)
+/// - Form validation
+/// - Cancel and save functionality
+///
+/// ## Usage
+///
+/// ```swift
+/// .sheet(isPresented: $showingEdit) {
+///     EditTaskView(item: taskToEdit)
+/// }
+/// ```
+///
+/// ## Modal Presentation
+///
+/// ```swift
+/// @State private var showingEditView = false
+///
+/// Button("Edit Task") {
+///     showingEditView = true
+/// }
+/// .sheet(isPresented: $showingEditView) {
+///     EditTaskView(item: selectedTask)
+/// }
+/// ```
 public struct EditTaskView: View {
+    /// The task item to edit.
     public let item: Item
+    
     @Environment(\.presentationMode) var presentationMode
     
     @State private var task: String = ""
@@ -16,6 +53,11 @@ public struct EditTaskView: View {
     @State private var imageData: Data?
     @State private var hasDueDate: Bool = false
     
+    /// Creates a new edit task view.
+    ///
+    /// The view will be pre-populated with the current values from the provided task item.
+    ///
+    /// - Parameter item: The task item to edit.
     public init(item: Item) {
         self.item = item
     }

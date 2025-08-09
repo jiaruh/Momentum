@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "Momentum",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v17)
     ],
@@ -21,19 +22,28 @@ let package = Package(
         // Core module - Data models and shared utilities
         .target(
             name: "MomentumCore",
-            dependencies: []
+            dependencies: [],
+            swiftSettings: [
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
         ),
         
         // Authentication module
         .target(
             name: "MomentumAuthentication",
-            dependencies: ["MomentumCore"]
+            dependencies: ["MomentumCore"],
+            swiftSettings: [
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
         ),
         
         // UI Components module
         .target(
             name: "MomentumUI",
-            dependencies: ["MomentumCore"]
+            dependencies: ["MomentumCore"],
+            swiftSettings: [
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
         ),
         
         // Features module - Main app features
@@ -43,6 +53,9 @@ let package = Package(
                 "MomentumCore",
                 "MomentumAuthentication",
                 "MomentumUI"
+            ],
+            swiftSettings: [
+                .enableExperimentalFeature("StrictConcurrency")
             ]
         ),
         

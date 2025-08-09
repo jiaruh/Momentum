@@ -2,10 +2,45 @@ import SwiftUI
 import UIKit
 import MomentumCore
 
+/// A detailed view for displaying and managing individual tasks.
+///
+/// `TaskDetailView` provides a comprehensive interface for viewing all aspects
+/// of a task including its description, priority, due date, additional details,
+/// and attached images.
+///
+/// ## Features
+///
+/// - Complete task information display
+/// - Completion status toggle
+/// - Priority level with color coding
+/// - Due date display
+/// - Image attachment viewing
+/// - Edit functionality via sheet presentation
+///
+/// ## Usage
+///
+/// ```swift
+/// NavigationLink(destination: TaskDetailView(item: task)) {
+///     TaskRow(item: task)
+/// }
+/// ```
+///
+/// ## Navigation Integration
+///
+/// ```swift
+/// NavigationView {
+///     TaskDetailView(item: selectedTask)
+/// }
+/// ```
 public struct TaskDetailView: View {
+    /// The task item to display in detail.
     public let item: Item
+    
     @State private var showingEditTaskView = false
     
+    /// Creates a new task detail view.
+    ///
+    /// - Parameter item: The task item to display in detail.
     public init(item: Item) {
         self.item = item
     }

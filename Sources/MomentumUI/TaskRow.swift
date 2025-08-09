@@ -1,10 +1,35 @@
 import SwiftUI
 import MomentumCore
 
+/// A reusable row component for displaying task items in lists.
+///
+/// `TaskRow` provides a consistent interface for displaying tasks with completion
+/// status, navigation to detail view, and visual indicators for attachments.
+///
+/// ## Features
+///
+/// - Completion toggle button
+/// - Navigation to task detail view
+/// - Visual indicators for attached images
+/// - Strike-through text for completed tasks
+/// - Support for task descriptions
+///
+/// ## Usage
+///
+/// ```swift
+/// List(tasks) { task in
+///     TaskRow(item: task)
+/// }
+/// ```
 public struct TaskRow: View {
+    /// The task item to display.
     public let item: Item
+    
     @State private var showingEditTaskView = false
     
+    /// Creates a new task row.
+    ///
+    /// - Parameter item: The task item to display in this row.
     public init(item: Item) {
         self.item = item
     }
