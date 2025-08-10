@@ -5,13 +5,110 @@ import UIKit
 import MomentumCore
 import MomentumUI
 
+/// Sorting criteria for tasks.
+enum TaskSortOption: String, CaseIterable, Identifiable {
+    case creationDateNewest = "Creation Date (Newest)"
+    case creationDateOldest = "Creation Date (Oldest)"
+    case dueDateSoonest = "Due Date (Soonest)"
+    case dueDateLatest = "Due Date (Latest)"
+    case priorityHighToLow = "Priority (High to Low)"
+    case priorityLowToHigh = "Priority (Low to High)"
+    case alphabeticalAtoZ = "Alphabetical (A-Z)"
+    case alphabeticalZtoA = "Alphabetical (Z-A)"
+    
+    var id: String { self.rawValue }
+    
+    /// Provides a localized description for the sort option.
+    var localizedDescription: String {
+        self.rawValue
+    }
+}
+
 public struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Item.createdAt, order: .reverse) private var items: [Item]
+    @Query private var items: [Item] // Sorting will be handled in filteredItems
 
     @State private var showingAddTaskView = false
+    @State private var searchText = ""
+    @State private var selectedSortOption: TaskSortOption = .creationDateNewest // Default sort
 
     public init() {}
+
+    private var filteredItems: [Item] {
+        // 1. Apply search filter
+        let searchFilteredItems: [Item]
+        if searchText.isEmpty {
+            searchFilteredItems = items
+        } else {
+            searchFilteredItems = items.filter { item in
+                item.task.localizedCaseInsensitiveContains(searchText) ||
+                (item.detailsText?.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
+        }
+        
+        // 2. Apply sorting
+        let sortedItems = sortItems(searchFilteredItems, by: selectedSortOption)
+        
+        return sortedItems
+    }
+    
+    /// Sorts an array of items based on the specified sort option.
+    /// - Parameters:
+    ///   - items: The array of items to sort.
+    ///   - option: The sorting option to apply.
+    /// - Returns: A new array containing the sorted items.
+    private func sortItems(_ items: [Item], by option: TaskSortOption) -> [Item] {
+        switch option {
+        case .creationDateNewest:
+            return items.sorted { $0.createdAt > $1.createdAt }
+        case .creationDateOldest:
+            return items.sorted { $0.createdAt < $1.createdAt }
+        case .dueDateSoonest:
+            // Tasks without due dates go to the end
+            return items.sorted { item1, item2 in
+                guard let date1 = item1.dueDate else { return false }
+                guard let date2 = item2.dueDate else { return true }
+                return date1 < date2
+            }
+        case .dueDateLatest:
+            // Tasks without due dates go to the end
+            return items.sorted { item1, item2 in
+                guard let date1 = item1.dueDate else { return false }
+                guard let date2 = item2.dueDate else { return true }
+                return date1 > date2
+            }
+        case .priorityHighToLow:
+            // Define priority order
+            let priorityOrder: [String: Int] = [
+                TaskPriority.high.rawValue: 3,
+                TaskPriority.normal.rawValue: 2,
+                TaskPriority.low.rawValue: 1
+            ]
+            // Tasks without priority go to the end
+            return items.sorted { item1, item2 in
+                let priority1 = priorityOrder[item1.priority ?? ""] ?? 0
+                let priority2 = priorityOrder[item2.priority ?? ""] ?? 0
+                return priority1 > priority2
+            }
+        case .priorityLowToHigh:
+            // Define priority order
+            let priorityOrder: [String: Int] = [
+                TaskPriority.high.rawValue: 3,
+                TaskPriority.normal.rawValue: 2,
+                TaskPriority.low.rawValue: 1
+            ]
+            // Tasks without priority go to the end
+            return items.sorted { item1, item2 in
+                let priority1 = priorityOrder[item1.priority ?? ""] ?? 0
+                let priority2 = priorityOrder[item2.priority ?? ""] ?? 0
+                return priority1 < priority2
+            }
+        case .alphabeticalAtoZ:
+            return items.sorted { $0.task.localizedCaseInsensitiveCompare($1.task) == .orderedAscending }
+        case .alphabeticalZtoA:
+            return items.sorted { $0.task.localizedCaseInsensitiveCompare($1.task) == .orderedDescending }
+        }
+    }
 
     public var body: some View {
         NavigationView {
@@ -20,8 +117,16 @@ public struct HomeView: View {
                     .edgesIgnoringSafeArea(.all)
 
                 VStack(spacing: 0) {
+                    TextField("Search tasks...", text: $searchText)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                        .padding(.bottom, 5)
+
                     List {
-                        ForEach(items) { item in
+                        ForEach(filteredItems) { item in
                             TaskRow(item: item)
                                 .listRowSeparator(.hidden)
                                 .listRowBackground(Color.clear)
@@ -33,6 +138,17 @@ public struct HomeView: View {
                 .navigationTitle("My Tasks")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Menu {
+                            Picker("Sort By", selection: $selectedSortOption) {
+                                ForEach(TaskSortOption.allCases) { option in
+                                    Text(option.localizedDescription).tag(option)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "arrow.up.arrow.down")
+                        }
+                    }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         EditButton()
                     }
