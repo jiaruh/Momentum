@@ -24,6 +24,8 @@ enum TaskSortOption: String, CaseIterable, Identifiable {
     }
 }
 
+
+
 public struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item] // Sorting will be handled in filteredItems
@@ -31,6 +33,8 @@ public struct HomeView: View {
     @State private var showingAddTaskView = false
     @State private var searchText = ""
     @State private var selectedSortOption: TaskSortOption = .creationDateNewest // Default sort
+    @State private var selectedStatusFilter: TaskStatusFilter = .all // Default status filter
+    @State private var selectedPriorityFilter: TaskPriorityFilter = .all // Default priority filter
 
     public init() {}
 
@@ -46,8 +50,30 @@ public struct HomeView: View {
             }
         }
         
-        // 2. Apply sorting
-        let sortedItems = sortItems(searchFilteredItems, by: selectedSortOption)
+        // 2. Apply status filter
+        let statusFilteredItems: [Item]
+        switch selectedStatusFilter {
+        case .all:
+            statusFilteredItems = searchFilteredItems
+        case .active:
+            statusFilteredItems = searchFilteredItems.filter { !$0.isCompleted }
+        case .completed:
+            statusFilteredItems = searchFilteredItems.filter { $0.isCompleted }
+        }
+        
+        // 3. Apply priority filter
+        let priorityFilteredItems: [Item]
+        switch selectedPriorityFilter {
+        case .all:
+            priorityFilteredItems = statusFilteredItems
+        case .low, .normal, .high:
+            priorityFilteredItems = statusFilteredItems.filter { item in
+                item.priority == selectedPriorityFilter.rawValue
+            }
+        }
+        
+        // 4. Apply sorting
+        let sortedItems = sortItems(priorityFilteredItems, by: selectedSortOption)
         
         return sortedItems
     }
@@ -124,6 +150,13 @@ public struct HomeView: View {
                         .cornerRadius(10)
                         .padding(.horizontal)
                         .padding(.bottom, 5)
+                    
+                    // Filter menus
+                    FilterMenuView(
+                        selectedStatusFilter: $selectedStatusFilter,
+                        selectedPriorityFilter: $selectedPriorityFilter
+                    )
+                    .padding(.bottom, 8)
 
                     List {
                         ForEach(filteredItems) { item in

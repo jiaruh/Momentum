@@ -25,6 +25,9 @@ The app has been refactored into the following modules:
 **Contents**:
 - `TaskRow.swift` - Reusable task row component
 - `StatCard.swift` - Statistics card component
+- `FilterMenuView.swift` - Modern filter menu component with chips
+- `TaskDetailView.swift` - Task detail view component
+- `EditTaskView.swift` - Task editing component
 
 ### 4. MomentumFeatures
 **Purpose**: Main app features and screens

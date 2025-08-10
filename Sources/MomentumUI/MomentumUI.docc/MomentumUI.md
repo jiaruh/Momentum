@@ -13,6 +13,8 @@ MomentumUI provides a collection of reusable SwiftUI components designed specifi
 - ``TaskRow``
 - ``TaskDetailView``
 - ``EditTaskView``
+- ``FilterMenuView``
+- ``FilterChipView``
 
 ### Statistics Components
 
@@ -62,6 +64,29 @@ struct StatsOverview: View {
                 icon: "list.bullet",
                 color: .blue
             )
+        }
+    }
+}
+```
+
+#### Task Filtering
+
+```swift
+import SwiftUI
+import MomentumUI
+
+struct TaskFilterView: View {
+    @State private var statusFilter: TaskStatusFilter = .all
+    @State private var priorityFilter: TaskPriorityFilter = .all
+    
+    var body: some View {
+        VStack {
+            FilterMenuView(
+                selectedStatusFilter: $statusFilter,
+                selectedPriorityFilter: $priorityFilter
+            )
+            
+            // Your filtered task list here
         }
     }
 }
