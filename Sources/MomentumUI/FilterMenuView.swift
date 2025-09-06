@@ -145,6 +145,12 @@ public struct FilterMenuView: View {
             return "clock"
         case .completed:
             return "checkmark.circle"
+        case .dueToday:
+            return "calendar.badge.clock"
+        case .upcoming:
+            return "calendar.badge.exclamationmark"
+        case .withReminders:
+            return "bell.badge"
         }
     }
     
@@ -156,6 +162,12 @@ public struct FilterMenuView: View {
             return Color.orange
         case .completed:
             return Color.green
+        case .dueToday:
+            return Color.red
+        case .upcoming:
+            return Color.yellow
+        case .withReminders:
+            return Color.purple
         }
     }
     
@@ -241,6 +253,9 @@ public enum TaskStatusFilter: String, CaseIterable, Identifiable {
     case all = "All"
     case active = "Active"
     case completed = "Completed"
+    case dueToday = "Due Today"
+    case upcoming = "Upcoming"
+    case withReminders = "With Reminders"
     
     public var id: String { self.rawValue }
 }

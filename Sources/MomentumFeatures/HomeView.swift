@@ -59,6 +59,9 @@ public struct HomeView: View {
             statusFilteredItems = searchFilteredItems.filter { !$0.isCompleted }
         case .completed:
             statusFilteredItems = searchFilteredItems.filter { $0.isCompleted }
+        case .dueToday, .upcoming, .withReminders:
+            // These are handled in the reminder filter step
+            statusFilteredItems = searchFilteredItems
         }
         
         // 3. Apply priority filter
@@ -72,8 +75,33 @@ public struct HomeView: View {
             }
         }
         
-        // 4. Apply sorting
-        let sortedItems = sortItems(priorityFilteredItems, by: selectedSortOption)
+        // 4. Apply reminder-related filters
+        let reminderFilteredItems: [Item]
+        switch selectedStatusFilter {
+        case .dueToday:
+            let today = Calendar.current.startOfDay(for: Date())
+            let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
+            reminderFilteredItems = priorityFilteredItems.filter { item in
+                guard let reminderDate = item.reminderDate else { return false }
+                return reminderDate >= today && reminderDate < tomorrow
+            }
+        case .upcoming:
+            let today = Calendar.current.startOfDay(for: Date())
+            let nextWeek = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: today)!
+            reminderFilteredItems = priorityFilteredItems.filter { item in
+                guard let reminderDate = item.reminderDate else { return false }
+                return reminderDate >= today && reminderDate < nextWeek
+            }
+        case .withReminders:
+            reminderFilteredItems = priorityFilteredItems.filter { item in
+                item.reminderEnabled && item.reminderDate != nil
+            }
+        default:
+            reminderFilteredItems = priorityFilteredItems
+        }
+        
+        // 5. Apply sorting
+        let sortedItems = sortItems(reminderFilteredItems, by: selectedSortOption)
         
         return sortedItems
     }
@@ -229,6 +257,12 @@ struct AddTaskView: View {
     @State private var selectedImageItem: PhotosPickerItem?
     @State private var imageData: Data?
     
+    // Reminder-related state
+    @State private var reminderEnabled: Bool = false
+    @State private var reminderDate = Date()
+    @State private var isRepeating: Bool = false
+    @State private var repeatInterval: RepeatInterval = .none
+    
     var body: some View {
         NavigationView {
             Form {
@@ -242,6 +276,24 @@ struct AddTaskView: View {
                     }
                     
                     DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
+                }
+                
+                Section(header: Text("Reminder")) {
+                    Toggle("Enable Reminder", isOn: $reminderEnabled)
+                    
+                    if reminderEnabled {
+                        DatePicker("Reminder Time", selection: $reminderDate, displayedComponents: [.date, .hourAndMinute])
+                        
+                        Toggle("Repeat", isOn: $isRepeating)
+                        
+                        if isRepeating {
+                            Picker("Repeat Interval", selection: $repeatInterval) {
+                                ForEach(RepeatInterval.allCases) { interval in
+                                    Text(interval.rawValue).tag(interval)
+                                }
+                            }
+                        }
+                    }
                 }
                 
                 Section(header: Text("Additional Details")) {
@@ -286,14 +338,29 @@ struct AddTaskView: View {
     
     private func addItem() {
         withAnimation {
+            let reminderId = reminderEnabled ? NotificationManager.shared.generateReminderId() : nil
+            
             let newItem = Item(
                 task: task,
                 dueDate: dueDate,
                 priority: priority.rawValue,
                 detailsText: detailsText.isEmpty ? nil : detailsText,
-                imageData: imageData
+                imageData: imageData,
+                reminderId: reminderId,
+                reminderDate: reminderEnabled ? reminderDate : nil,
+                reminderEnabled: reminderEnabled,
+                isRepeating: isRepeating,
+                repeatInterval: isRepeating ? repeatInterval : nil
             )
             modelContext.insert(newItem)
+            
+            // Schedule notification if reminder is enabled
+            if reminderEnabled {
+                Task {
+                    await NotificationManager.shared.scheduleTaskReminder(for: newItem)
+                }
+            }
+            
             presentationMode.wrappedValue.dismiss()
         }
     }

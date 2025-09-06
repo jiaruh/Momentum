@@ -53,6 +53,12 @@ public struct EditTaskView: View {
     @State private var imageData: Data?
     @State private var hasDueDate: Bool = false
     
+    // Reminder-related state
+    @State private var reminderEnabled: Bool = false
+    @State private var reminderDate = Date()
+    @State private var isRepeating: Bool = false
+    @State private var repeatInterval: RepeatInterval = .none
+    
     /// Creates a new edit task view.
     ///
     /// The view will be pre-populated with the current values from the provided task item.
@@ -78,6 +84,24 @@ public struct EditTaskView: View {
                     
                     if hasDueDate {
                         DatePicker("Due Date", selection: $dueDate, displayedComponents: .date)
+                    }
+                }
+                
+                Section(header: Text("Reminder")) {
+                    Toggle("Enable Reminder", isOn: $reminderEnabled)
+                    
+                    if reminderEnabled {
+                        DatePicker("Reminder Time", selection: $reminderDate, displayedComponents: [.date, .hourAndMinute])
+                        
+                        Toggle("Repeat", isOn: $isRepeating)
+                        
+                        if isRepeating {
+                            Picker("Repeat Interval", selection: $repeatInterval) {
+                                ForEach(RepeatInterval.allCases) { interval in
+                                    Text(interval.rawValue).tag(interval)
+                                }
+                            }
+                        }
                     }
                 }
                 
@@ -151,6 +175,14 @@ public struct EditTaskView: View {
         }
         detailsText = item.detailsText ?? ""
         imageData = item.imageData
+        
+        // Load reminder-related values
+        reminderEnabled = item.reminderEnabled
+        if let itemReminderDate = item.reminderDate {
+            reminderDate = itemReminderDate
+        }
+        isRepeating = item.isRepeating
+        repeatInterval = item.repeatInterval ?? .none
     }
     
     private func saveChanges() {
@@ -168,6 +200,32 @@ public struct EditTaskView: View {
                 // Update with new image
                 item.imageData = newImageData
             }
+        }
+        
+        // Handle reminder settings
+        if reminderEnabled {
+            // Generate reminder ID if not exists
+            if item.reminderId == nil {
+                item.reminderId = NotificationManager.shared.generateReminderId()
+            }
+            item.reminderEnabled = true
+            item.reminderDate = reminderDate
+            item.isRepeating = isRepeating
+            item.repeatInterval = isRepeating ? repeatInterval : nil
+            
+            // Schedule notification
+            Task {
+                await NotificationManager.shared.scheduleTaskReminder(for: item)
+            }
+        } else {
+            // Disable reminder and cancel notification
+            item.reminderEnabled = false
+            item.reminderDate = nil
+            item.isRepeating = false
+            item.repeatInterval = nil
+            
+            // Cancel existing notification
+            NotificationManager.shared.cancelTaskReminder(for: item)
         }
         
         presentationMode.wrappedValue.dismiss()

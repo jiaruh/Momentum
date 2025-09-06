@@ -79,11 +79,64 @@ public struct TaskRow: View {
                             .font(.caption)
                             .foregroundColor(priorityColor(for: priority))
                     }
+                    
+                    // 添加提醒信息
+                    if item.reminderEnabled, let reminderDate = item.reminderDate {
+                        HStack {
+                            Image(systemName: "bell.fill")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                            Text("Reminder: \(reminderDate, style: .date) \(reminderDate, style: .time)")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+                    }
+                    
+                    // 添加重复信息
+                    if item.isRepeating, let repeatInterval = item.repeatInterval {
+                        HStack {
+                            Image(systemName: "repeat")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                            Text("Repeats: \(repeatInterval.rawValue)")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                        }
+                    }
                 }
             }
             .buttonStyle(PlainButtonStyle())
             
             Spacer()
+            
+            // 添加快速提醒操作按钮
+            if item.reminderEnabled {
+                Button(action: {
+                    // 快速修改提醒时间 - 这里可以扩展为弹出时间选择器
+                    Task {
+                        await NotificationManager.shared.cancelTaskReminder(for: item)
+                        item.reminderEnabled = false
+                    }
+                }) {
+                    Image(systemName: "bell.slash")
+                        .foregroundColor(.orange)
+                }
+            } else {
+                Button(action: {
+                    // 快速设置提醒 - 这里可以扩展为弹出时间选择器
+                    let reminderId = NotificationManager.shared.generateReminderId()
+                    item.reminderId = reminderId
+                    item.reminderDate = Date().addingTimeInterval(3600) // 1小时后
+                    item.reminderEnabled = true
+                    
+                    Task {
+                        await NotificationManager.shared.scheduleTaskReminder(for: item)
+                    }
+                }) {
+                    Image(systemName: "bell")
+                        .foregroundColor(.gray)
+                }
+            }
         }
         .padding()
         .background(Color.white.opacity(0.9))
